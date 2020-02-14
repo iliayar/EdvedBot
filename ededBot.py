@@ -23,12 +23,19 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
 
 
 
-updater = Updater(token=TOKEN, request_kwargs=REQUEST_KWARGS)
+# updater = Updater(token=TOKEN, request_kwargs=REQUEST_KWARGS)
+updater = Updater(token=TOKEN)
 
 
+def init_sql():
+    conn = sqlite3.connect('eded.db')
+
+    conn.cursor().execute('CREATE TABLE users (id int PRIMARY KEY)')
+
+    conn.commit()
+    conn.close()
 
 def sched_event():
-
     now = datetime.datetime.now()
     if(now.minute == 0 ):
         conn = sqlite3.connect('eded.db')
@@ -48,6 +55,8 @@ def sched_event():
 def start(bot,update):
     bot.send_message(chat_id=update.message.chat_id,text='Your\'e now subscribed on EDED')
     bot.send_photo(chat_id=update.message.chat_id,photo=open('./img.png','rb'))
+
+    print("New user with id " + str(update.message.chat_id))
 
     conn = sqlite3.connect('eded.db')
 
@@ -80,7 +89,7 @@ def interval_msg(bot,update):
         pass
 
 
-
+init_sql()
 stop_handler = CommandHandler('stop', stop)
 start_handler = CommandHandler('start',start)
 updater.dispatcher.add_handler(start_handler)
